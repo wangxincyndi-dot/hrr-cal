@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>储备心率区间计算器</title>
+  
+  <!-- 微信分享卡片 -->
+  <meta property="og:title" content="储备心率区间计算器" />
+  <meta property="og:description" content="使用储备心率法计算 E/M/T/A/I/R 六类训练强度区间，科学指导跑步训练" />
+  <meta property="og:image" content="https://a443f493f2084ef5a23025d4f8253729.codebuddy.cloudstudio.run/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:url" content="https://a443f493f2084ef5a23025d4f8253729.codebuddy.cloudstudio.run" />
+  <meta property="og:type" content="website" />
+
+  <style>
+    :root {
+      --thu-purple: #4b2e83;
+      --thu-purple-dark: #321a5f;
+      --thu-purple-light: #7657a8;
+      --bg: #f4f3f6;
+      --card: #ffffff;
+      --gray-900: #26262b;
+      --gray-700: #55545c;
+      --gray-500: #8a8891;
+      --gray-300: #d8d6de;
+      --gray-200: #ebe9ef;
+      --shadow: 0 24px 60px rgba(37, 31, 52, 0.12);
+      --shadow-mobile: 0 14px 34px rgba(37, 31, 52, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(75, 46, 131, 0.14), transparent 32%),
+        linear-gradient(135deg, #f7f6f9 0%, #eceaf1 100%);
+      color: var(--gray-900);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body,
+    button,
+    input,
+    textarea,
+    select {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    button,
+    input {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 56px 20px 72px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 16px;
+      border: 1px solid rgba(75, 46, 131, 0.22);
+      border-radius: 999px;
+      color: var(--thu-purple);
+      background: rgba(255, 255, 255, 0.66);
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--thu-purple);
+      flex: 0 0 auto;
+      align-self: center;
+    }
+
+    .eyebrow .initial {
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: var(--thu-purple-dark);
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.12;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 0 auto;
+      color: var(--gray-700);
+      font-size: 17px;
+    }
+
+    .science-link {
+      max-width: 760px;
+      margin: 18px auto 0;
+      text-align: center;
+    }
+
+    .science-link a {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      color: var(--thu-purple-dark);
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid rgba(75, 46, 131, 0.2);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(75, 46, 131, 0.1);
+      transition:
+        transform 0.24s ease,
+        box-shadow 0.24s ease,
+        color 0.24s ease,
+        border-color 0.24s ease,
+        background 0.24s ease;
+    }
+
+    .science-link a::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(
+          120deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.2) 35%,
+          rgba(255, 255, 255, 0.75) 50%,
+          rgba(255, 255, 255, 0.2) 65%,
+          transparent 100%
+        );
+      transform: translateX(-120%);
+      transition: transform 0.7s ease;
+      pointer-events: none;
+    }
+
+    .science-link a::after {
+      content: "↗";
+      font-size: 14px;
+      opacity: 0.82;
+      transition: transform 0.24s ease;
+      flex: 0 0 auto;
+    }
+
+    .science-link a span {
+      position: relative;
+      z-index: 1;
+      background-image: linear-gradient(currentColor, currentColor);
+      background-repeat: no-repeat;
+      background-size: 0% 1px;
+      background-position: 0 100%;
+      transition: background-size 0.24s ease;
+    }
+
+    .science-link a:hover {
+      transform: translateY(-2px);
+      color: #ffffff;
+      border-color: rgba(75, 46, 131, 0.38);
+      background:
+        linear-gradient(135deg, rgba(50, 26, 95, 0.95), rgba(75, 46, 131, 0.86));
+      box-shadow: 0 16px 34px rgba(75, 46, 131, 0.22);
+    }
+
+    .science-link a:hover::before {
+      transform: translateX(120%);
+    }
+
+    .science-link a:hover::after {
+      transform: translate(2px, -2px);
+    }
+
+    .science-link a:hover span {
+      background-size: 100% 1px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 430px);
+      justify-content: center;
+      align-items: start;
+      gap: 28px;
+    }
+
+    .layout.result-mode {
+      grid-template-columns: minmax(320px, 880px);
+      justify-content: center;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .input-card {
+      padding: 30px;
+    }
+
+    .input-card.hidden {
+      display: none;
+    }
+
+    .section-title {
+      margin: 0 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--thu-purple-dark);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .section-title small {
+      color: var(--gray-500);
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .result-head .section-title {
+      margin: 0;
+      flex: 1;
+    }
+
+    .reset-top {
+      width: auto;
+      min-width: 118px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .field {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--gray-700);
+      font-size: 15px;
+      letter-spacing: 0.04em;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px 52px 15px 16px;
+      border: 1px solid var(--gray-300);
+      border-radius: 16px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--gray-900);
+      font-size: 20px;
+      transition: 0.2s ease;
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input:focus {
+      border-color: var(--thu-purple);
+      box-shadow: 0 0 0 4px rgba(75, 46, 131, 0.1);
+    }
+
+    .unit {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-500);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--gray-500);
+      font-size: 13px;
+    }
+
+    .btns {
+      display: grid;
+      grid-template-columns: 1fr 0.72fr;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 15px 16px;
+      cursor: pointer;
+      font-size: 16px;
+      letter-spacing: 0.05em;
+      transition: 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--thu-purple), var(--thu-purple-dark));
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(75, 46, 131, 0.28);
+    }
+
+    .primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(75, 46, 131, 0.34);
+    }
+
+    .secondary {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+
+    .secondary:hover {
+      background: #dedbe6;
+    }
+
+    .result-card {
+      display: none;
+      padding: 30px;
+      overflow: hidden;
+    }
+
+    .result-card.show {
+      display: block;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .summary-item {
+      padding: 20px 22px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #ffffff, #f0eef5);
+      border: 1px solid rgba(75, 46, 131, 0.08);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--gray-500);
+      font-size: 15px;
+      letter-spacing: 0.08em;
+    }
+
+    .summary-item strong {
+      font-size: 32px;
+      color: var(--thu-purple-dark);
+      font-weight: 700;
+    }
+
+    .summary-item strong::after {
+      content: " bpm";
+      font-size: 14px;
+      color: var(--gray-500);
+      font-weight: 400;
+    }
+
+    .zones {
+      display: grid;
+      gap: 14px;
+    }
+
+    .zone {
+      display: grid;
+      grid-template-columns: 86px 1fr 150px;
+      gap: 18px;
+      align-items: center;
+      padding: 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--gray-200);
+      transition: 0.2s ease;
+    }
+
+    .zone:hover {
+      transform: translateY(-2px);
+      border-color: rgba(75, 46, 131, 0.24);
+      box-shadow: 0 14px 28px rgba(37, 31, 52, 0.08);
+    }
+
+    .letter {
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--thu-purple-dark), var(--thu-purple));
+      color: white;
+      font-size: 38px;
+      line-height: 1;
+      font-weight: 700;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .zone-main h3 {
+      margin: 0 0 4px;
+      color: var(--gray-900);
+      font-size: 19px;
+      letter-spacing: 0.04em;
+    }
+
+    .zone-main p {
+      margin: 0;
+      color: var(--gray-500);
+      font-size: 14px;
+    }
+
+    .zone-main .desc {
+      margin-top: 8px;
+      color: var(--gray-700);
+      font-size: 14px;
+    }
+
+    .range {
+      text-align: right;
+    }
+
+    .range strong {
+      display: block;
+      color: var(--thu-purple-dark);
+      font-size: 25px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .range span {
+      display: block;
+      margin-top: 4px;
+      color: var(--gray-500);
+      font-size: 13px;
+    }
+
+    .note {
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--thu-purple);
+      background: rgba(75, 46, 131, 0.06);
+      border-radius: 14px;
+      color: var(--gray-700);
+      font-size: 14px;
+    }
+
+    .error {
+      display: none;
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(160, 40, 64, 0.08);
+      color: #8a2035;
+      font-size: 14px;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    footer {
+      margin-top: 38px;
+      text-align: center;
+      color: var(--gray-500);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+    }
+
+    @media (max-width: 900px) {
+      .layout,
+      .layout.result-mode {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        background:
+          radial-gradient(circle at top left, rgba(75, 46, 131, 0.16), transparent 42%),
+          linear-gradient(180deg, #f8f7fa 0%, #efedf4 100%);
+      }
+
+      .page {
+        padding: 34px 14px 46px;
+      }
+
+      .hero {
+        margin-bottom: 24px;
+        text-align: left;
+      }
+
+      .eyebrow {
+        padding: 5px 12px;
+        gap: 6px;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+      }
+
+      .eyebrow .initial {
+        font-size: 19px;
+      }
+
+      h1 {
+        margin: 14px 0 10px;
+        font-size: 31px;
+        line-height: 1.18;
+        letter-spacing: 0.01em;
+      }
+
+      .subtitle {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.8;
+        color: var(--gray-700);
+      }
+
+      .science-link {
+        margin: 16px 0 0;
+        text-align: left;
+      }
+
+      .science-link a {
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 12px 14px;
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .layout {
+        gap: 18px;
+      }
+
+      .card {
+        border-radius: 24px;
+        box-shadow: var(--shadow-mobile);
+      }
+
+      .input-card,
+      .result-card {
+        padding: 20px;
+      }
+
+      .section-title {
+        margin-bottom: 18px;
+        font-size: 20px;
+        align-items: flex-end;
+      }
+
+      .section-title small {
+        font-size: 11px;
+      }
+
+      .result-head {
+        align-items: flex-start;
+        margin-bottom: 18px;
+      }
+
+      .result-head .section-title {
+        display: block;
+      }
+
+      .result-head .section-title small {
+        display: block;
+        margin-top: 2px;
+      }
+
+      .reset-top {
+        min-width: 92px;
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+
+      input {
+        min-height: 52px;
+        padding: 13px 50px 13px 15px;
+        border-radius: 15px;
+        font-size: 19px;
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .hint {
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .btns {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      button {
+        min-height: 48px;
+        padding: 12px 10px;
+        border-radius: 15px;
+        font-size: 15px;
+      }
+
+      .summary {
+        margin-bottom: 16px;
+      }
+
+      .summary-item {
+        padding: 15px;
+        border-radius: 18px;
+      }
+
+      .summary-item span {
+        font-size: 13px;
+      }
+
+      .summary-item strong {
+        font-size: 28px;
+      }
+
+      .zones {
+        gap: 12px;
+      }
+
+      .zone {
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 15px;
+        border-radius: 20px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(246, 244, 250, 0.78));
+      }
+
+      .zone:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .letter {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        font-size: 30px;
+      }
+
+      .zone-main {
+        min-width: 0;
+      }
+
+      .zone-main h3 {
+        font-size: 17px;
+        line-height: 1.35;
+        margin-bottom: 3px;
+      }
+
+      .zone-main p {
+        font-size: 12px;
+        line-height: 1.45;
+        word-break: break-word;
+      }
+
+      .zone-main .desc {
+        margin-top: 7px;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      .range {
+        grid-column: 1 / -1;
+        text-align: left;
+        margin-top: 2px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(75, 46, 131, 0.07);
+        border: 1px solid rgba(75, 46, 131, 0.08);
+      }
+
+      .range strong {
+        font-size: 24px;
+        color: var(--thu-purple-dark);
+      }
+
+      .range strong::after {
+        content: " bpm";
+        font-size: 13px;
+        color: var(--gray-500);
+        font-weight: 400;
+      }
+
+      .range span {
+        margin-top: 3px;
+        font-size: 12px;
+      }
+
+      .note {
+        margin-top: 16px;
+        padding: 15px;
+        border-radius: 14px;
+        font-size: 13px;
+        line-height: 1.75;
+      }
+
+      footer {
+        margin-top: 28px;
+        padding: 0 8px;
+        font-size: 11px;
+        line-height: 1.7;
+        letter-spacing: 0.04em;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .page {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .input-card,
+      .result-card {
+        padding: 18px;
+      }
+
+      .summary-item {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .summary-item span {
+        margin-bottom: 0;
+      }
+
+      .zone {
+        grid-template-columns: 48px 1fr;
+      }
+
+      .letter {
+        width: 48px;
+        height: 48px;
+        font-size: 27px;
+      }
+
+      .btns {
+        grid-template-columns: 1fr;
+      }
+
+      .result-head {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .reset-top {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">
+        <span><span class="initial">H</span>EART</span>
+        <span><span class="initial">R</span>ATE</span>
+        <span><span class="initial">R</span>ESERVE</span>
+      </div>
+
+      <h1>储备心率区间计算器</h1>
+
+      <p class="subtitle">
+        使用储备心率法计算 E / M / T / A / I / R 六类训练强度区间
+      </p>
+
+      <div class="science-link">
+        <a 
+          href="https://zhuanlan.zhihu.com/p/34946013" 
+          target="_blank" 
+          rel="noopener noreferrer"
+        >
+          <span>科普：三种计算方式、五个分区——运动中的心率区间了解一下？</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="layout" id="layout">
+      <aside class="card input-card" id="inputCard">
+        <h2 class="section-title">
+          输入数据
+          <small>基础心率</small>
+        </h2>
+
+        <div class="field">
+          <label for="maxHr">最大心率</label>
+          <div class="input-wrap">
+            <input
+              id="maxHr"
+              type="number"
+              inputmode="numeric"
+              min="120"
+              max="230"
+              placeholder="请输入"
+            />
+            <span class="unit">bpm</span>
+          </div>
+          <div class="hint">可使用实测最大心率，或先用经验公式（220-年龄）估算</div>
+        </div>
+
+        <div class="field">
+          <label for="restHr">静息心率</label>
+          <div class="input-wrap">
+            <input
+              id="restHr"
+              type="number"
+              inputmode="numeric"
+              min="35"
+              max="100"
+              placeholder="请输入"
+            />
+            <span class="unit">bpm</span>
+          </div>
+          <div class="hint">建议使用清晨醒来后、安静状态下的平均值</div>
+        </div>
+
+        <div class="btns">
+          <button class="primary" onclick="calculate()">开始计算</button>
+          <button class="secondary" onclick="resetForm()">重置</button>
+        </div>
+
+        <div id="error" class="error"></div>
+      </aside>
+
+      <section class="card result-card" id="resultCard">
+        <div class="result-head">
+          <h2 class="section-title">
+            运动强度区
+            <small>E / M / T / A / I / R</small>
+          </h2>
+
+          <button class="secondary reset-top" onclick="resetForm()">重置数据</button>
+        </div>
+
+        <div class="summary">
+          <div class="summary-item">
+            <span>储备心率</span>
+            <strong id="summaryReserve">—</strong>
+          </div>
+        </div>
+
+        <div class="zones" id="zones"></div>
+
+        <div class="note">
+          注：R 爆发力训练区间通常不以心率作为主要控制指标，更多依赖配速、动作质量、间歇时间与主观强度
+        </div>
+      </section>
+    </section>
+
+    <footer>
+      以训练指导为目的 · 非医疗建议 · 请结合身体状态与专业教练建议使用
+    </footer>
+  </main>
+
+  <script>
+    const zones = [
+      {
+        key: "E",
+        name: "轻松跑区间",
+        english: "easy running",
+        min: 0.59,
+        max: 0.74,
+        number: "1.1–2.0",
+        desc: "低强度有氧，适合恢复、打基础和长时间轻松跑"
+      },
+      {
+        key: "M",
+        name: "马拉松配速区间",
+        english: "marathon-pace running",
+        min: 0.74,
+        max: 0.84,
+        number: "2.1–3.0",
+        desc: "中等有氧强度，接近马拉松比赛节奏"
+      },
+      {
+        key: "T",
+        name: "乳酸阈值区间",
+        english: "threshold running",
+        min: 0.84,
+        max: 0.88,
+        number: "3.1–4.0",
+        desc: "提升维持较高速度的能力，强度较高但可控"
+      },
+      {
+        key: "A",
+        name: "无氧耐力区间",
+        english: "anaerobic running",
+        min: 0.88,
+        max: 0.95,
+        number: "4.1–5.0",
+        desc: "高强度训练，主要用于提升无氧耐力与速度能力"
+      },
+      {
+        key: "I",
+        name: "最大摄氧区间",
+        english: "interval training",
+        min: 0.95,
+        max: 1.00,
+        number: "5.1–6.0",
+        desc: "接近最大摄氧强度，通常采用间歇训练形式"
+      },
+      {
+        key: "R",
+        name: "爆发力训练区间",
+        english: "repetition training",
+        min: null,
+        max: null,
+        number: "—",
+        desc: "不主要参考心率，常用于短距离速度、跑姿与神经肌肉能力训练"
+      }
+    ];
+
+    function bpm(value) {
+      return Math.round(value);
+    }
+
+    function calculate() {
+      const maxHr = Number(document.getElementById("maxHr").value);
+      const restHr = Number(document.getElementById("restHr").value);
+      const error = document.getElementById("error");
+
+      error.classList.remove("show");
+      error.textContent = "";
+
+      if (!maxHr || !restHr) {
+        showError("请输入最大心率与静息心率");
+        return;
+      }
+
+      if (maxHr < 120 || maxHr > 230) {
+        showError("最大心率合理范围为 120–230 bpm，请重新输入");
+        return;
+      }
+
+      if (restHr < 35 || restHr > 100) {
+        showError("静息心率合理范围为 35–100 bpm，请重新输入");
+        return;
+      }
+
+      if (maxHr <= restHr) {
+        showError("最大心率需要高于静息心率");
+        return;
+      }
+
+      const reserve = maxHr - restHr;
+
+      document.getElementById("summaryReserve").textContent = reserve;
+
+      const zoneWrap = document.getElementById("zones");
+      zoneWrap.innerHTML = "";
+
+      zones.forEach(zone => {
+        let rangeText = "不考虑心率";
+        let percentText = "";
+
+        if (zone.min !== null && zone.max !== null) {
+          const low = bpm(restHr + reserve * zone.min);
+          const high = bpm(restHr + reserve * zone.max);
+          rangeText = `${low}–${high}`;
+          percentText = `${Math.round(zone.min * 100)}%–${Math.round(zone.max * 100)}% HRR`;
+        } else {
+          percentText = "以配速与动作质量为主";
+        }
+
+        const item = document.createElement("article");
+        item.className = "zone";
+        item.innerHTML = `
+          <div class="letter">${zone.key}</div>
+          <div class="zone-main">
+            <h3>${zone.name}</h3>
+            <p>${zone.english}</p>
+            <div class="desc">${zone.desc}</div>
+          </div>
+          <div class="range">
+            <strong>${rangeText}</strong>
+            <span>${percentText}</span>
+          </div>
+        `;
+        zoneWrap.appendChild(item);
+      });
+
+      document.getElementById("layout").classList.add("result-mode");
+      document.getElementById("inputCard").classList.add("hidden");
+      document.getElementById("resultCard").classList.add("show");
+    }
+
+    function showError(message) {
+      const error = document.getElementById("error");
+      error.textContent = message;
+      error.classList.add("show");
+    }
+
+    function resetForm() {
+      document.getElementById("maxHr").value = "";
+      document.getElementById("restHr").value = "";
+      document.getElementById("summaryReserve").textContent = "—";
+      document.getElementById("zones").innerHTML = "";
+
+      document.getElementById("error").classList.remove("show");
+      document.getElementById("error").textContent = "";
+
+      document.getElementById("layout").classList.remove("result-mode");
+      document.getElementById("inputCard").classList.remove("hidden");
+      document.getElementById("resultCard").classList.remove("show");
+    }
+  </script>
+</body>
+</html>
